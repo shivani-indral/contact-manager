@@ -70,4 +70,25 @@ class ContactController extends Controller
         $contact->delete();
         return redirect()->route('contacts.index')->with('success', 'Contact deleted successfully.');
     }
+
+    public function importXML(Request $request)
+{
+    $request->validate([
+        'xml_file' => 'required|file|mimes:xml',
+    ]);
+
+    $xmlFile = $request->file('xml_file');
+    $xmlContent = simplexml_load_file($xmlFile);
+
+    foreach ($xmlContent->contact as $contact) {
+        Contact::create([
+            'name' => (string) $contact->name,
+            'email' => (string) $contact->email,
+            'phone' => (string) $contact->phone,
+        ]);
+    }
+
+    return redirect()->route('contacts.index')->with('success', 'Contacts imported successfully.');
+}
+
 }
