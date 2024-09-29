@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Contact;
 use Illuminate\Http\Request;
 use App\Http\Requests\ContactRequest;
+use Illuminate\Support\Facades\Validator;
 
 class ContactController extends Controller
 {
@@ -74,23 +75,64 @@ class ContactController extends Controller
     }
 
     public function importXML(Request $request)
-{
-    $request->validate([
-        'xml_file' => 'required|file|mimes:xml',
-    ]);
-
-    $xmlFile = $request->file('xml_file');
-    $xmlContent = simplexml_load_file($xmlFile);
-
-    foreach ($xmlContent->contact as $contact) {
-        Contact::create([
-            'name' => (string) $contact->name,
-            'lastname' => (string) $contact->lastname,
-            'phone' => (string) $contact->phone,
+    {
+        // Validate the uploaded XML file
+        $request->validate([
+            'xml_file' => 'required|file|mimes:xml',
         ]);
+    
+        // Load the XML content
+        $xmlFile = $request->file('xml_file');
+        $xmlContent = simplexml_load_file($xmlFile);
+    
+        $errors = [];
+    
+        // Check if the XML content has contacts
+        if (empty($xmlContent->contact)) {
+            return redirect()->route('contacts.index')->with('error', 'No contacts found in the XML file.');
+        }
+    
+        // Iterate through each contact in the XML file
+        foreach ($xmlContent->contact as $contact) {
+            // Convert contact data to an array
+            $contactData = [
+                'name' => (string) $contact->name,
+                'lastname' => (string) $contact->lastname,
+                'phone' => (string) $contact->phone,
+            ];
+    
+            // Manually validate the data using Laravel's Validator
+            $validator = Validator::make($contactData, [
+                'name' => 'required|string|max:255',
+                'lastname' => 'required|string|max:255',
+                'phone' => 'required',
+            ]);
+    
+            if ($validator->fails()) {
+                // Collect errors for this contact and skip creation
+                $errors[] = [
+                    'contact' => $contactData,
+                    'errors' => $validator->errors()->all(),
+                ];
+                continue;
+            }
+    
+            // If validation passes, create the contact
+            Contact::create($contactData);
+        }
+    
+        // If there are any validation errors, redirect back with the error messages
+        if (!empty($errors)) {
+            // Use the array of errors to create a single error message
+            $xmlErrors = [];
+            foreach ($errors as $error) {
+                $xmlErrors[] = 'Contact: ' . implode(', ', $error['contact']) . ' - Errors: ' . implode(', ', $error['errors']);
+            }
+    
+            return redirect()->route('contacts.index')->withErrors(['xml_file' => $xmlErrors])->with('error', 'Some contacts could not be imported due to validation errors.');
+        }
+    
+        return redirect()->route('contacts.index')->with('success', 'Contacts imported successfully.');
     }
-
-    return redirect()->route('contacts.index')->with('success', 'Contacts imported successfully.');
-}
-
+    
 }

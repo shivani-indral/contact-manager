@@ -24,7 +24,7 @@ class ContactRequest extends FormRequest
         return [
                 'name' => 'required|string|max:255',
                 'lastname' => 'required|string|max:255',
-                'phone' => 'required|numeric|digits_between:10,15',
+                'phone' => 'required',
             ];
     }
 
@@ -34,7 +34,6 @@ class ContactRequest extends FormRequest
             'name.required' => 'The name field is mandatory.',
             'lastname.required' => 'The lastname field is mandatory.',
             'phone.required' => 'The phone number is required.',
-            'phone.numeric' => 'The phone number must be a valid number.',
         ];
     }
 }

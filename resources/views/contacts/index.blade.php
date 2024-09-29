@@ -3,6 +3,17 @@
 @section('content')
     <a href="{{ route('contacts.create') }}" class="btn btn-primary">Add New Contact</a>
 
+    <!-- Display validation errors -->
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <form action="{{ route('contacts.import') }}" method="POST" enctype="multipart/form-data">
         @csrf
         <input type="file" name="xml_file" required>
