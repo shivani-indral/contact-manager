@@ -66,8 +66,9 @@ class ContactController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
+        $contact = Contact::findOrFail($id);
         $contact->delete();
         return redirect()->route('contacts.index')->with('success', 'Contact deleted successfully.');
     }
@@ -84,7 +85,7 @@ class ContactController extends Controller
     foreach ($xmlContent->contact as $contact) {
         Contact::create([
             'name' => (string) $contact->name,
-            'email' => (string) $contact->email,
+            'lastname' => (string) $contact->lastname,
             'phone' => (string) $contact->phone,
         ]);
     }
