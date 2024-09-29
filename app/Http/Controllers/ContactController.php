@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Contact;
 use Illuminate\Http\Request;
+use App\Http\Requests\ContactRequest;
 
 class ContactController extends Controller
 {
@@ -27,7 +28,7 @@ class ContactController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Contact $request)
+    public function store(ContactRequest $request)
     {
         Contact::create($request->validated());
 
@@ -54,7 +55,7 @@ class ContactController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Contact $request,$id)
+    public function update(ContactRequest $request,$id)
     {
         $contact = Contact::findOrFail($id);
         $contact->update($request->validated());
