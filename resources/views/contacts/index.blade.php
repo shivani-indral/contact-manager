@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layout.app')
 
 @section('content')
     <a href="{{ route('contacts.create') }}" class="btn btn-primary">Add New Contact</a>
